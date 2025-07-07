@@ -23,6 +23,7 @@ export class TodoListsService {
     const todoList: TodoList = {
       id: this.nextId(),
       name: dto.name,
+      items: dto.items || [],
     };
 
     this.todolists.push(todoList);
