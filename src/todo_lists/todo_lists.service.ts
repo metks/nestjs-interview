@@ -5,10 +5,10 @@ import { TodoList } from '../interfaces/todo_list.interface';
 
 @Injectable()
 export class TodoListsService {
-  private readonly todolists: TodoList[];
+  private todolists: TodoList[] = [];
 
-  constructor(todoLists: TodoList[] = []) {
-    this.todolists = todoLists;
+  constructor() {
+    // Initialize with empty array - this will persist in memory as a singleton
   }
 
   all(): TodoList[] {
@@ -16,7 +16,13 @@ export class TodoListsService {
   }
 
   get(id: number): TodoList {
-    return this.todolists.find((x) => x.id === Number(id));
+    const todoList = this.todolists.find((x) => x.id === Number(id));
+
+    if (!todoList) {
+      throw new Error(`TodoList with id ${id} not found`);
+    }
+
+    return todoList;
   }
 
   create(dto: CreateTodoListDto): TodoList {
@@ -32,16 +38,24 @@ export class TodoListsService {
   }
 
   update(id: number, dto: UpdateTodoListDto): TodoList {
-    const todolist = this.todolists.find((x) => x.id == Number(id));
+    const todolist = this.todolists.find((x) => x.id === Number(id));
 
-    // Update the record
-    todolist.name = dto.name;
+    if (!todolist) {
+      throw new Error(`TodoList with id ${id} not found`);
+    }
+
+    if (dto.name !== undefined) {
+      todolist.name = dto.name;
+    }
+    if (dto.items !== undefined) {
+      todolist.items = dto.items;
+    }
 
     return todolist;
   }
 
   delete(id: number): void {
-    const index = this.todolists.findIndex((x) => x.id == Number(id));
+    const index = this.todolists.findIndex((x) => x.id === Number(id));
 
     if (index > -1) {
       this.todolists.splice(index, 1);

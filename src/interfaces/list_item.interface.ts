@@ -1,5 +1,5 @@
 export interface TodoListItem {
-  id: number;
+  id: string;
   listId: number;
   name: string;
   completed: boolean;
