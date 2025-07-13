@@ -43,4 +43,23 @@ export class TodoListsController {
   delete(@Param() param: { todoListId: number }): void {
     this.todoListsService.delete(param.todoListId);
   }
+
+  // Nuevos endpoints para manejo de items específicos
+  @Put('/:todoListId/items/:itemId/toggle')
+  toggleItem(@Param() param: { todoListId: number; itemId: string }): TodoList {
+    return this.todoListsService.toggleTodoItem(param.todoListId, param.itemId);
+  }
+
+  @Post('/:todoListId/items')
+  addItem(
+    @Param() param: { todoListId: number },
+    @Body() itemData: { id: string; name: string; completed?: boolean },
+  ): TodoList {
+    return this.todoListsService.addTodoItem(param.todoListId, itemData);
+  }
+
+  @Delete('/:todoListId/items/:itemId')
+  removeItem(@Param() param: { todoListId: number; itemId: string }): TodoList {
+    return this.todoListsService.removeTodoItem(param.todoListId, param.itemId);
+  }
 }

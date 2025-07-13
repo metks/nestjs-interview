@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebSocket Test</title>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  </head>
+  <body>
+    <h1>WebSocket Test</h1>
+    <div id="status">Connecting...</div>
+    <div id="messages"></div>
+
+    <div>
+      <button onclick="joinList(1)">Join List 1</button>
+      <button onclick="createTestList()">Create Test List</button>
+      <button onclick="toggleTestItem()">Toggle Test Item</button>
+    </div>
+
+    <script>
+      const socket = io('http://localhost:3002', {
+        transports: ['websocket', 'polling'],
+      });
+
+      const statusDiv = document.getElementById('status');
+      const messagesDiv = document.getElementById('messages');
+
+      socket.on('connect', () => {
+        statusDiv.textContent = 'Connected to WebSocket server';
+        addMessage('Connected to server');
+      });
+
+      socket.on('disconnect', () => {
+        statusDiv.textContent = 'Disconnected from WebSocket server';
+        addMessage('Disconnected from server');
+      });
+
+      socket.on('todo-list-updated', (data) => {
+        addMessage('List Updated: ' + JSON.stringify(data, null, 2));
+      });
+
+      socket.on('todo-item-updated', (data) => {
+        addMessage('Item Updated: ' + JSON.stringify(data, null, 2));
+      });
+
+      function addMessage(message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.style.margin = '5px 0';
+        messageDiv.style.padding = '5px';
+        messageDiv.style.backgroundColor = '#f0f0f0';
+        messageDiv.textContent =
+          new Date().toLocaleTimeString() + ': ' + message;
+        messagesDiv.appendChild(messageDiv);
+      }
+
+      function joinList(listId) {
+        socket.emit('join-list', { listId: listId });
+        addMessage(`Joining list ${listId}`);
+      }
+
+      function createTestList() {
+        fetch('http://localhost:3000/api/todolists', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: 'Test List ' + new Date().getTime(),
+            items: [],
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            addMessage('Created list via REST API: ' + JSON.stringify(data));
+          })
+          .catch((error) => {
+            addMessage('Error creating list: ' + error);
+          });
+      }
+
+      function toggleTestItem() {
+        // First create a list with an item, then toggle it
+        fetch('http://localhost:3000/api/todolists', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: 'Test List with Item',
+            items: [
+              {
+                id: 'item-1',
+                listId: null,
+                name: 'Test Item',
+                completed: false,
+              },
+            ],
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            const listId = data.id;
+            // Join the list first
+            socket.emit('join-list', { listId: listId });
+
+            // Then toggle the item
+            setTimeout(() => {
+              fetch(
+                `http://localhost:3000/api/todolists/${listId}/items/item-1/toggle`,
+                {
+                  method: 'PUT',
+                },
+              )
+                .then((response) => response.json())
+                .then((toggleData) => {
+                  addMessage('Toggled item via REST API');
+                });
+            }, 1000);
+          });
+      }
+
+      // Auto-join list 1 on connect
+      socket.on('connect', () => {
+        setTimeout(() => joinList(1), 1000);
+      });
+    </script>
+  </body>
+</html>
