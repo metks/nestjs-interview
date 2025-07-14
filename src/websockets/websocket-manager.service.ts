@@ -10,7 +10,6 @@ export class WebSocketManager implements OnModuleInit {
   async onModuleInit() {
     console.log('🔧 Initializing WebSocket Manager...');
 
-    // Crear servidor Socket.IO independiente
     const httpServer = createServer();
 
     this.io = new Server(httpServer, {
@@ -22,7 +21,6 @@ export class WebSocketManager implements OnModuleInit {
       transports: ['websocket', 'polling'],
     });
 
-    // Configurar event handlers
     this.io.on('connection', (socket) => {
       console.log(`✅ Client connected: ${socket.id}`);
 
@@ -56,7 +54,6 @@ export class WebSocketManager implements OnModuleInit {
       });
     });
 
-    // Iniciar en puerto 3002 (diferente del HTTP)
     httpServer.listen(3002, () => {
       console.log('🚀 WebSocket server listening on port 3002');
     });

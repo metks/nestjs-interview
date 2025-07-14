@@ -28,7 +28,6 @@ export class TodoGateway
 
   constructor() {
     console.log('🔧 TodoGateway constructor called');
-    // Dar tiempo para que NestJS inicialice completamente el servidor WebSocket
     setTimeout(() => {
       console.log('🔄 Checking WebSocket server after delay...', !!this.server);
     }, 2000);
@@ -42,7 +41,6 @@ export class TodoGateway
 
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
-    // Aquí podrías manejar la lógica de conexión si es necesario
   }
 
   handleDisconnect(client: Socket) {
@@ -84,13 +82,11 @@ export class TodoGateway
     console.log(`Client ${client.id} left room ${roomName}`);
   }
 
-  // Métodos para notificar desde servicios
   notifyTodoItemUpdate(listId: number, data: any) {
     console.log(
       `📤 Attempting to send item update notification to list-${listId}`,
     );
 
-    // Verificar si el servidor está disponible de forma más robusta
     if (!this.server) {
       console.warn('⚠️ WebSocket server not available, notification skipped');
       console.log('📊 Available clients: 0 (server not initialized)');
@@ -120,7 +116,6 @@ export class TodoGateway
       `📤 Attempting to send list update notification to list-${listId}`,
     );
 
-    // Verificar si el servidor está disponible de forma más robusta
     if (!this.server) {
       console.warn('⚠️ WebSocket server not available, notification skipped');
       console.log('📊 Available clients: 0 (server not initialized)');
